@@ -9,10 +9,10 @@ import androidx.compose.ui.graphics.Color
 val accent = Color(0x660FA7E7)
 // Define your custom colors
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF64C7BE),
-    secondary = Color(0xFF0A796D),
-    background = Color(0xFFC3FFC9),
-    surface = Color(0xFFFFFFFF),
+    primary = Color(0xFFCFE795),
+    secondary = Color(0xFFA7D3A6),
+    background = Color(0xFFD4C685),
+    surface = Color(0xFFF7EF81),
     onPrimary = Color.White,
     onSecondary = Color.Black,
     onBackground = Color.Black,

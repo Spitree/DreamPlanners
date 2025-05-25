@@ -12,8 +12,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +36,7 @@ import androidx.lifecycle.ViewModel
 import com.example.dreamplanner.*
 import com.example.dreamplanner.Models.*
 import com.example.dreamplanner.ui.theme.DreamPlannerTheme
+import java.nio.file.WatchEvent
 
 
 class MainActivity : ComponentActivity() {
@@ -42,29 +50,37 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Main() {
     val viewModel: MainViewModel = viewModel()
     val navController = rememberNavController()
 
-    Column(modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.secondary)) {
-        // Wspólny nagłówek
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Dream Planner", fontSize = 22.sp)
+                },
+                actions = {
+                    IconButton(onClick = { navController.navigate("profile") }) {
+                        Text(text = "👤", fontSize = 20.sp)
+                        // Lub zamiast emoji możesz użyć:
+                        // Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            BottomBar(navController = navController)
+        }
+    ) { innerPadding ->
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.secondary)
         ) {
-            Text(
-                text = "Dream Planner",
-                fontSize = 28.sp,
-                modifier = Modifier.align(Alignment.CenterStart)
-            )
-        }
-
-        // Nawigacja między ekranami
-        Box(modifier = Modifier.weight(1f)) {
             NavHost(navController = navController, startDestination = "screen1") {
                 composable("screen1") {
                     Screen1(navController = navController, viewModel, plans = samplePlans)
@@ -78,49 +94,120 @@ fun Main() {
                 composable("screen4") {
                     Screen4(navController = navController, viewModel, plans = samplePlans)
                 }
+                composable("profile") {
+                    ProfileScreen(navController = navController, viewModel = viewModel)
+                }
             }
         }
-
-        BottomBar(navController = navController)
     }
 }
+
 
 
 @Composable
 fun BottomBar(navController: NavController) {
     Row(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(MaterialTheme.colorScheme.primary) // tło całego paska
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
-
     ) {
-        listOf(
+        val navItems = listOf(
             "screen1" to R.drawable.house,
             "screen2" to R.drawable.moon,
             "screen3" to R.drawable.notepad,
             "screen4" to R.drawable.book
-        ).forEach { (route, imageResource) ->
-            Box(
+        )
+
+        navItems.forEach { (route, imageResource) ->
+            Card(
                 modifier = Modifier
-                    .height(40.dp) // kontroluje wysokość obrazka
-                    .weight(1f)   // każdy element zajmuje tyle samo miejsca
+                    .weight(1f)
+                    .height(52.dp)
+                    .padding(horizontal = 4.dp)
                     .clickable {
                         navController.navigate(route)
-                    }
-                    .padding(horizontal = 4.dp)
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                ),
+                shape = MaterialTheme.shapes.medium,
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Image(
-                    painter = painterResource(id = imageResource),
-                    contentDescription = null, // brak opisu, bo label usunięty
-                    modifier = Modifier.fillMaxSize()
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = imageResource),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxHeight(0.6f)
+                            .aspectRatio(1f)
+                            .background(color = MaterialTheme.colorScheme.primary)
+                    )
+                }
             }
         }
     }
 }
+
+@Composable
+fun ProfileScreen(navController: NavController, viewModel: MainViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // background color
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Profile",
+            fontSize = 28.sp,
+            color = MaterialTheme.colorScheme.primary, // title color
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Example user info card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Username: Dreamer",
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Email: dreamer@example.com",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { navController.popBackStack() },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            )
+        ) {
+            Text("Back to Main")
+        }
+    }
+}
+
+
+
 
 class MainViewModel : ViewModel(){
     var plans = mutableStateListOf<Plan>().apply { addAll(samplePlans) }
