@@ -1,7 +1,10 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -41,9 +44,16 @@ android {
 
 dependencies {
     val nav_version = "2.7.7"
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation("androidx.room:room-runtime:2.7.1")
+    kapt("androidx.room:room-compiler:2.7.1")
+    implementation ("androidx.room:room-ktx:2.7.1")
+    implementation("com.google.accompanist:accompanist-pager:0.34.0")
+    implementation ("androidx.compose.material3:material3:1.1.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
     implementation ("androidx.navigation:navigation-compose:$nav_version")
-    implementation ("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.0.5")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

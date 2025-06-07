@@ -1,21 +1,20 @@
 package com.example.dreamplanner
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,21 +26,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.lifecycle.ViewModel
-import com.example.dreamplanner.*
-import com.example.dreamplanner.Models.*
+import com.example.dreamplanner.database.*
 import com.example.dreamplanner.ui.theme.DreamPlannerTheme
-import java.nio.file.WatchEvent
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.getInsetsController(window,window.decorView).apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(WindowInsetsCompat.Type.statusBars())
+            hide(WindowInsetsCompat.Type.navigationBars())
+        }
         setContent {
             DreamPlannerTheme {
                 Main()
@@ -53,7 +57,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Main() {
-    val viewModel: MainViewModel = viewModel()
+    val viewModel: PlanViewModel = viewModel()
     val navController = rememberNavController()
 
     Scaffold(
@@ -64,9 +68,7 @@ fun Main() {
                 },
                 actions = {
                     IconButton(onClick = { navController.navigate("profile") }) {
-                        Text(text = "👤", fontSize = 20.sp)
-                        // Lub zamiast emoji możesz użyć:
-                        // Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
+                        Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
                     }
                 }
             )
@@ -83,19 +85,19 @@ fun Main() {
         ) {
             NavHost(navController = navController, startDestination = "screen1") {
                 composable("screen1") {
-                    Screen1(navController = navController, viewModel, plans = samplePlans)
+                    Screen1(navController = navController, viewModel)
                 }
                 composable("screen2") {
-                    Screen2(navController = navController, viewModel, sleeps = samplePlans)
+                    Screen2(navController = navController, viewModel)
                 }
                 composable("screen3") {
-                    Screen3(navController = navController, viewModel, articles = samplePlans)
+                    Screen3(navController = navController, viewModel)
                 }
                 composable("screen4") {
-                    Screen4(navController = navController, viewModel, plans = samplePlans)
+                    Screen4(navController = navController, viewModel)
                 }
                 composable("profile") {
-                    ProfileScreen(navController = navController, viewModel = viewModel)
+                    ProfileScreen(navController = navController, viewModel)
                 }
             }
         }
@@ -155,7 +157,7 @@ fun BottomBar(navController: NavController) {
 }
 
 @Composable
-fun ProfileScreen(navController: NavController, viewModel: MainViewModel) {
+fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -204,15 +206,4 @@ fun ProfileScreen(navController: NavController, viewModel: MainViewModel) {
             Text("Back to Main")
         }
     }
-}
-
-
-
-
-class MainViewModel : ViewModel(){
-    var plans = mutableStateListOf<Plan>().apply { addAll(samplePlans) }
-    var goals = mutableStateListOf<Goal>().apply { addAll(sampleGoals) }
-    var dailyTasks = mutableStateListOf<DailyTask>().apply { addAll(sampleDailyTasks) }
-    var sleepEntries = mutableStateListOf<SleepEntry>().apply { addAll(sampleSleepEntries) }
-
 }

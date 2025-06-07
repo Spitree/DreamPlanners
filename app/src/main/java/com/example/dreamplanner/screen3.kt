@@ -7,19 +7,29 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.dreamplanner.Models.*
+import com.example.dreamplanner.database.Plan
+import com.example.dreamplanner.database.PlanViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Screen3(navController: NavController, viewModel: MainViewModel, articles: List<Plan>) {
+fun Screen3(navController: NavController, viewModel: PlanViewModel) {
+    val articles by viewModel.plans.observeAsState(emptyList())
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Dream Archives") })
+            TopAppBar(
+                title = {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                    Text("Dream Archives")
+                    }
+                }
+            )
         }
     ) { innerPadding ->
         Column(
@@ -32,15 +42,6 @@ fun Screen3(navController: NavController, viewModel: MainViewModel, articles: Li
             ExpandableSection("Nightmares", articles)
             ExpandableSection("Recurring Dreams", articles)
             ExpandableSection("Other Dreams", articles)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Back to Main Screen")
-            }
         }
     }
 }
