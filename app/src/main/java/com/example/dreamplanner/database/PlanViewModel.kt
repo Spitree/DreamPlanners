@@ -42,4 +42,23 @@ class PlanViewModel(application:Application) : AndroidViewModel(application) {
             planDao.insert(plan)
         }
     }
+
+    fun clearAndInsertPlans(plans: List<Plan>) {
+        viewModelScope.launch {
+            // Usuń wszystkie istniejące plany
+            planDao.getAll().value?.forEach { planDao.delete(it) }
+            planDao.deleteAll()
+
+            // Wstaw nowe plany
+            planDao.insertAll(plans)
+        }
+    }
+
+    suspend fun deleteAllPlans() {
+        planDao.getAll().value?.forEach { planDao.delete(it) }
+    }
+
+    suspend fun insertAll(plans: List<Plan>) {
+        planDao.insertAll(plans)
+    }
 }

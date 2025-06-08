@@ -54,6 +54,7 @@ dependencies {
     implementation ("androidx.navigation:navigation-compose:$nav_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation ("androidx.compose.runtime:runtime-livedata:1.0.5")
+    implementation("com.facebook.android:facebook-android-sdk:[8,9)")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

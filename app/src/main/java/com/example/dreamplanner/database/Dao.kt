@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 
@@ -13,10 +14,12 @@ interface PlanDao {
     suspend fun count(): Int
     @Query("SELECT * FROM `Plan`")
     fun getAll(): LiveData<List<Plan>>
+    @Query("DELETE FROM `Plan`")
+    suspend fun deleteAll()
     @Insert
     suspend fun insert(plan: Plan)
-    @Insert
-    suspend fun insertAll(plan: List<Plan>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(plans: List<Plan>)
     @Update
     suspend fun update(plan: Plan)
     @Delete
