@@ -1,9 +1,5 @@
 package com.example.dreamplanner
 
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,17 +23,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -48,19 +39,33 @@ import com.example.dreamplanner.ui.theme.DreamPlannerTheme
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+
 private const val CALENDAR_PERMISSION_CODE = 101
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Ukryj pasek statusu i nawigacji
-        WindowCompat.getInsetsController(window, window.decorView).apply {
+        WindowCompat.getInsetsController(window,window.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             hide(WindowInsetsCompat.Type.statusBars())
             hide(WindowInsetsCompat.Type.navigationBars())
         }
+        val database = AppDatabase.getInstance(application)
+        val repository = PlanRepository(
+            database.planDao(),
+            database.goalDao(),
+            database.dailyTaskDao()
+        )
+
+        val viewModelFactory = PlanViewModelFactory(application, repository)
+        val viewModel = ViewModelProvider(this, viewModelFactory)[PlanViewModel::class.java]
 
         // Żądanie uprawnień
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR)
@@ -77,10 +82,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DreamPlannerTheme {
-                Main()
+                Main(viewModel)
             }
         }
     }
+
 
     // Obsługa odpowiedzi użytkownika na żądanie uprawnienia
     override fun onRequestPermissionsResult(
@@ -110,100 +116,51 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun getTodayCalendarEvents(context: Context): List<Plan> {
-    val contentResolver = context.contentResolver
-    val events = mutableListOf<Plan>()
-
-    val startOfDay = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-    }.timeInMillis
-
-    val endOfDay = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, 23)
-        set(Calendar.MINUTE, 59)
-        set(Calendar.SECOND, 59)
-        set(Calendar.MILLISECOND, 999)
-    }.timeInMillis
-
-    val projection = arrayOf("title", "dtstart", "eventLocation")
-    val selection = "(dtstart >= ?) AND (dtstart <= ?)"
-    val selectionArgs = arrayOf(startOfDay.toString(), endOfDay.toString())
-
-    val cursor = contentResolver.query(
-        Uri.parse("content://com.android.calendar/events"),
-        projection,
-        selection,
-        selectionArgs,
-        null
-    )
-
-    cursor?.use {
-        val titleIndex = it.getColumnIndex("title")
-        val dateIndex = it.getColumnIndex("dtstart")
-        val placeIndex = it.getColumnIndex("eventLocation")
-
-        while (it.moveToNext()) {
-            val title = it.getString(titleIndex) ?: "Bez tytułu"
-            val date = it.getLong(dateIndex)
-            val place = it.getString(placeIndex) ?: "Brak lokalizacji"
-            events.add(Plan(name = title, date = date, priority = 1, place = place))
-        }
-    }
-
-    return events
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Main() {
-    val viewModel: PlanViewModel = viewModel()
+fun Main(viewModel: PlanViewModel) {
+    val viewModel: PlanViewModel = viewModel
     val navController = rememberNavController()
-    var isLoggedIn by remember { mutableStateOf(false) } // <-- stan logowania
+    var isLoggedIn by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            if (isLoggedIn) {
-                TopAppBar(
-                    title = { Text("Dream Planner", fontSize = 22.sp) },
-                    actions = {
-                        IconButton(onClick = { navController.navigate("profile") }) {
-                            Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
-                        }
+            TopAppBar(
+                title = { Text("Dream Planner", fontSize = 22.sp) },
+                actions = {
+                    IconButton(onClick = { navController.navigate("profile") }) {
+                        Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
                     }
-                )
-            }
+                }
+            )
         },
         bottomBar = {
-            if (isLoggedIn) {
-                BottomBar(navController = navController)
-            }
+            BottomBar(navController = navController)
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.secondary)
         ) {
-            NavHost(navController = navController, startDestination = if (isLoggedIn) "screen1" else "login") {
+            NavHost(navController = navController, startDestination = "frontPage") {
+                composable("frontPage") {
+                    FrontPage(navController = navController, viewModel)
+                }
                 composable("login") {
                     LoginScreen(navController) {
                         isLoggedIn = true
                     }
                 }
-                composable("screen1") {
-                    Screen1(navController = navController, viewModel)
+                composable("sleep") {
+                    Sleep(navController = navController, viewModel)
                 }
-                composable("screen2") {
-                    Screen2(navController = navController, viewModel)
+                composable("articles") {
+                    Articles(navController = navController, viewModel)
                 }
-                composable("screen3") {
-                    Screen3(navController = navController, viewModel)
-                }
-                composable("screen4") {
-                    Screen4(navController = navController, viewModel)
+                composable("plans") {
+                    Plans(navController = navController, viewModel)
                 }
                 composable("profile") {
                     ProfileScreen(navController = navController, viewModel)
@@ -212,7 +169,6 @@ fun Main() {
         }
     }
 }
-
 
 
 
@@ -227,10 +183,10 @@ fun BottomBar(navController: NavController) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         val navItems = listOf(
-            "screen1" to R.drawable.house,
-            "screen2" to R.drawable.moon,
-            "screen3" to R.drawable.notepad,
-            "screen4" to R.drawable.book
+            "frontPage" to R.drawable.house,
+            "sleep" to R.drawable.moon,
+            "plans" to R.drawable.notepad,
+            "articles" to R.drawable.book
         )
 
         navItems.forEach { (route, imageResource) ->
@@ -302,6 +258,18 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { navController.navigate("login") },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            )
+        ) {
+            Text("Login")
         }
 
         Spacer(modifier = Modifier.height(32.dp))

@@ -19,7 +19,7 @@ import com.example.dreamplanner.database.PlanViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Screen3(navController: NavController, viewModel: PlanViewModel) {
+fun Articles(navController: NavController, viewModel: PlanViewModel) {
     val articles by viewModel.plans.observeAsState(emptyList())
     Scaffold(
         topBar = {

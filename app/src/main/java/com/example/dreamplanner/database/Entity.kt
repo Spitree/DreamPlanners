@@ -1,29 +1,32 @@
 package com.example.dreamplanner.database
 import androidx.room.*
-import java.sql.Time
-import java.util.Date
 
 @Entity
 data class Plan(
-    @PrimaryKey(autoGenerate = true) val uid: Int = 0, // unikalne ID (auto-generowane)
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     val name: String,
-    val date: Long,
     val priority: Int,
+    val date: Long,
     val place: String,
+    val description: String = "",
+    val completed: Boolean = false
 )
 
 @Entity
 data class DailyTask(
-    @PrimaryKey(autoGenerate = true) val uid: Int = 0, // unikalne ID (auto-generowane)
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     val name: String,
-    val completed: Boolean,
+    val priority: Int,
+    val description: String,
+    val date: Long,
+    val completed: Boolean
 )
 
 @Entity
 data class Goal(
-    @PrimaryKey(autoGenerate = true) val uid: Int = 0, // unikalne ID (auto-generowane)
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     val name: String,
-    val completed: Boolean,
+    val completed: Boolean = false
 )
 
 

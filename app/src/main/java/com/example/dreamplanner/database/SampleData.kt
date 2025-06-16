@@ -1,26 +1,97 @@
 package com.example.dreamplanner.database
 
 val samplePlans = listOf(
-    Plan(name = "Nauka Kotlin", date = 1735689600000L, priority = 1, place = "Dom"),        // 2025-04-30 00:00:00 UTC
-    Plan(name = "Zakupy spożywcze", date = 1735516800000L, priority = 2, place = "Supermarket"), // 2025-04-28 00:00:00 UTC
-    Plan(name = "Spotkanie z przyjacielem", date = 1735852800000L, priority = 1, place = "Kawiarnia") // 2025-05-02 00:00:00 UTC
-)
-
-val sampleGoals = listOf(
-    Goal(name = "Zrobić aplikację", completed = false),
-    Goal(name = "Przeczytać książkę", completed = true),
-    Goal(name = "Uczyć się regularnie", completed = false)
+    Plan(
+        name = "Nauka Kotlin",
+        date = 1735689600000L, // 2025-04-30
+        priority = 1,
+        place = "Dom",
+        description = "Przerobić kurs JetBrains",
+        completed = false
+    ),
+    Plan(
+        name = "Zakupy spożywcze",
+        date = 1735516800000L, // 2025-04-28
+        priority = 2,
+        place = "Supermarket",
+        description = "Kupić warzywa, owoce i chleb",
+        completed = true
+    ),
+    Plan(
+        name = "Spotkanie z przyjacielem",
+        date = 1735852800000L, // 2025-05-02
+        priority = 1,
+        place = "Kawiarnia",
+        description = "Omówić wspólny projekt",
+        completed = false
+    ),
+    Plan(
+        name = "Wizyta u lekarza",
+        date = 1736208400000L, // 2025-05-06
+        priority = 3,
+        place = "Przychodnia",
+        description = "Kontrola okresowa",
+        completed = false
+    ),
+    Plan(
+        name = "Weekendowy wypad",
+        date = 1736467600000L, // 2025-05-09
+        priority = 2,
+        place = "Mazury",
+        description = "Odpoczynek i relaks",
+        completed = true
+    )
 )
 
 val sampleDailyTasks = listOf(
-    DailyTask(name = "Medytacja", completed = true),
-    DailyTask(name = "Ćwiczenia", completed = false),
-    DailyTask(name = "Planowanie dnia", completed = true)
+    DailyTask(
+        name = "Zrobić aplikację",
+        completed = false,
+        priority = 1,
+        date = 1736467600000L, // 2025-05-09,
+        description = "Ukończyć MVP aplikacji DreamPlanner"
+    ),
+    DailyTask(
+        name = "Przeczytać książkę",
+        completed = true,
+        priority = 2,
+        date = 1736467600000L, // 2025-05-09,
+        description = "Skończyć 'Atomic Habits'"
+    ),
+    DailyTask(
+        name = "Uczyć się regularnie",
+        completed = false,
+        priority = 1,
+        date = 1736467600000L, // 2025-05-09,
+        description = "30 minut dziennie nauki programowania"
+    ),
+    DailyTask(
+        name = "Poprawić kondycję",
+        completed = false,
+        priority = 3,
+        date = 1736467600000L, // 2025-05-09,
+        description = "Codzienne spacery i bieganie 3 razy w tygodniu"
+    ),
+    DailyTask(
+        name = "Zacząć oszczędzać",
+        completed = true,
+        priority = 2,
+        date = 1736467600000L, // 2025-05-09,
+        description = "Stworzyć budżet miesięczny"
+    )
+)
+
+val sampleGoals = listOf(
+    Goal(name = "Medytacja", completed = true),
+    Goal(name = "Ćwiczenia", completed = false),
+    Goal(name = "Planowanie dnia", completed = true),
+    Goal(name = "Czytanie", completed = false),
+    Goal(name = "Poranna rutyna", completed = true)
 )
 
 val sampleSleepEntries = listOf(
-    SleepEntry(start = 22 * 3600000L, end = 6 * 3600000L),    // 22:00 i 06:00 jako ms od północy
-    SleepEntry(start = 23 * 3600000L + 30 * 60000L, end = 7 * 3600000L), // 23:30 i 07:00
-    SleepEntry(start = 0 * 3600000L + 15 * 60000L, end = 8 * 3600000L) // 00:15 i 08:00
+    SleepEntry(start = 2200, end = 600),    // 22:00 i 06:00 jako ms od północy
+    SleepEntry(start = 2300, end = 700), // 23:30 i 07:00
+    SleepEntry(start = 15, end = 800) // 00:15 i 08:00
 )
 

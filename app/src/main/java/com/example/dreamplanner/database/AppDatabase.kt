@@ -9,7 +9,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [Plan::class, DailyTask::class, SleepEntry::class, Goal::class], version = 4)
+@Database(entities = [Plan::class, DailyTask::class, SleepEntry::class, Goal::class],
+    version = 9)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun planDao(): PlanDao

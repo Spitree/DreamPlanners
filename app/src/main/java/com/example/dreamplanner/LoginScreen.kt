@@ -3,6 +3,7 @@ package com.example.dreamplanner
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -44,6 +45,7 @@ import com.example.dreamplanner.ui.theme.DreamPlannerTheme
 fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -71,9 +73,16 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
         Button(onClick = {
             if (username == "admin" && password == "1234") {
                 onLoginSuccess()
-                navController.navigate("screen1") {
+                navController.navigate("frontPage") {
                     popUpTo("login") { inclusive = true }
                 }
+            } else{
+                if (username != "admin"){
+                    Toast.makeText(context, "Incorrect Username",Toast.LENGTH_SHORT).show();
+                } else{
+                    Toast.makeText(context, "Incorrect Password",Toast.LENGTH_SHORT).show();
+                }
+
             }
         }) {
             Text("Zaloguj się")

@@ -16,12 +16,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.dreamplanner.R
 import com.example.dreamplanner.database.PlanViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Screen2(navController: NavController, viewModel: PlanViewModel) {
+fun Sleep(navController: NavController, viewModel: PlanViewModel) {
     val sleeps by viewModel.sleepEntries.observeAsState(emptyList())
     Scaffold(
         topBar = {

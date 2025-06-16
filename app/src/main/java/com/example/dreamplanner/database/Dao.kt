@@ -64,7 +64,7 @@ interface GoalDao {
     @Query("SELECT * FROM Goal")
     fun getAll(): LiveData<List<Goal>>
     @Insert
-    suspend fun insertPlan(goal: Goal)
+    suspend fun insert(goal: Goal)
     @Insert
     suspend fun insertAll(goal: List<Goal>)
     @Update

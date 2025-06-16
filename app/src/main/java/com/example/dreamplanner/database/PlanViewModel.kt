@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class PlanViewModel(application:Application) : AndroidViewModel(application) {
+class PlanViewModel(application:Application,private val repository: PlanRepository) : AndroidViewModel(application) {
     private val planDao = AppDatabase.getInstance(application).planDao()
     private val dailyTaskDao = AppDatabase.getInstance(application).dailyTaskDao()
     private val sleepEntryDao = AppDatabase.getInstance(application).sleepEntryDao()
@@ -34,12 +34,62 @@ class PlanViewModel(application:Application) : AndroidViewModel(application) {
             }
         }
     }
+
     //Udostępnia obserwowalną listę użytkowników z bazy.
-    fun addPlan(
-        plan: Plan
-    ) {
+    fun togglePlanCompleted(plan: Plan, completed: Boolean) {
         viewModelScope.launch {
-            planDao.insert(plan)
+            repository.updatePlan(plan.copy(completed = completed))
+        }
+    }
+
+    fun deletePlan(plan: Plan) {
+        viewModelScope.launch {
+            repository.deletePlan(plan)
+        }
+    }
+
+    fun addPlan(plan: Plan) {
+        viewModelScope.launch {
+            repository.insertPlan(plan)
+        }
+    }
+
+
+    fun toggleDailyTaskCompleted(task: DailyTask, completed: Boolean) {
+        viewModelScope.launch {
+            repository.updateDailyTask(task.copy(completed = completed))
+        }
+    }
+
+    fun deleteDailyTask(task: DailyTask) {
+        viewModelScope.launch {
+            repository.deleteDailyTask(task)
+        }
+    }
+
+    fun addDailyTask(task: DailyTask) {
+        viewModelScope.launch {
+            repository.insertDailyTask(task)
+        }
+    }
+
+    // analogicznie dla Goal
+
+    fun toggleGoalCompleted(goal: Goal, completed: Boolean) {
+        viewModelScope.launch {
+            repository.updateGoal(goal.copy(completed = completed))
+        }
+    }
+
+    fun deleteGoal(goal: Goal) {
+        viewModelScope.launch {
+            repository.deleteGoal(goal)
+        }
+    }
+
+    fun addGoal(goal: Goal) {
+        viewModelScope.launch {
+            repository.insertGoal(goal)
         }
     }
 
