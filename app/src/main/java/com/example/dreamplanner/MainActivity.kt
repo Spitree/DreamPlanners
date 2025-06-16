@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,18 +36,21 @@ import androidx.navigation.compose.rememberNavController
 import com.example.dreamplanner.database.*
 import com.example.dreamplanner.ui.theme.DreamPlannerTheme
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import android.Manifest
-import android.content.Context
+import android.animation.ObjectAnimator
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
 
 private const val CALENDAR_PERMISSION_CODE = 101
 
@@ -155,7 +157,10 @@ fun Main(viewModel: PlanViewModel) {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.secondary)
         ) {
-            NavHost(navController = navController, startDestination = "frontPage") {
+            NavHost(navController = navController, startDestination = "splash") {
+                composable ("splash") {
+                    SplashScreen(navController = navController);
+                }
                 composable("frontPage") {
                     FrontPage(navController = navController, viewModel)
                 }
@@ -194,7 +199,7 @@ fun BottomBar(navController: NavController) {
         val navItems = listOf(
             "frontPage" to R.drawable.house,
             "sleep" to R.drawable.moon,
-            "plans" to R.drawable.notepad,
+            "plans" to R.drawable.logo,
             "articles" to R.drawable.book
         )
 
@@ -202,6 +207,7 @@ fun BottomBar(navController: NavController) {
             Card(
                 modifier = Modifier
                     .weight(1f)
+                    .fillMaxWidth()
                     .height(52.dp)
                     .padding(horizontal = 4.dp)
                     .clickable {
@@ -221,9 +227,9 @@ fun BottomBar(navController: NavController) {
                         painter = painterResource(id = imageResource),
                         contentDescription = null,
                         modifier = Modifier
-                            .fillMaxHeight(0.6f)
-                            .aspectRatio(1f)
-                            .background(color = MaterialTheme.colorScheme.primary)
+                            .fillMaxSize()
+                            .padding(4.dp),
+                        contentScale = ContentScale.Fit
                     )
                 }
             }
@@ -308,3 +314,41 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
     }
 }
 
+@Composable
+fun SplashAnimation() {
+    AndroidView(
+        modifier = Modifier.size(150.dp),
+        factory = { ctx ->
+            ImageView(ctx).apply {
+                setImageResource(R.drawable.logo)
+
+                val animator = ObjectAnimator.ofFloat(this, "rotation", -25f, 25f).apply {
+                    duration = 600 // czas jednego przejścia (w ms)
+                    repeatMode = ObjectAnimator.REVERSE
+                    repeatCount = ObjectAnimator.INFINITE
+                    interpolator = AccelerateDecelerateInterpolator()
+                }
+                animator.start()
+            }
+        }
+    )
+}
+
+@Composable
+fun SplashScreen(navController: NavController) {
+    LaunchedEffect(Unit) {
+        delay(3000) // Czas trwania splash screenu
+        navController.navigate("frontPage") {
+            popUpTo("splash") { inclusive = true }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
+    ) {
+        SplashAnimation()
+    }
+}

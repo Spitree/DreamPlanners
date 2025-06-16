@@ -1,5 +1,6 @@
 package com.example.dreamplanner
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -38,44 +39,12 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
     // Sortowanie planów malejąco po priorytecie
     val sortedPlans = plans.sortedByDescending { it.priority }
 
-    // Ostatnie 3 dni snu (posortowane od najnowszego)
-    val recentSleep = sleepEntries.sortedByDescending { it.uid }.take(3)
-
-    fun formatTime(hhmm: Int): String {
-        val hours = hhmm / 100
-        val minutes = hhmm % 100
-        return String.format("%02d:%02d", hours, minutes)
-    }
     fun formatDuration(totalMinutes: Int): String {
         val hours = totalMinutes / 60
         val minutes = totalMinutes % 60
         return "${hours}h ${minutes}min"
     }
 
-    data class SleepDuration(val startStr: String, val endStr: String, val durationMinutes: Int)
-
-    val sleepDurations = recentSleep.map { entry ->
-        val start = entry.start.toInt()
-        val end = entry.end.toInt()
-
-        val (startH, startM) = Pair(start / 100, start % 100)
-        val (endH, endM) = Pair(end / 100, end % 100)
-
-        val startInMinutes = startH * 60 + startM
-        val endInMinutes = endH * 60 + endM
-
-        val duration = if (endInMinutes >= startInMinutes) {
-            endInMinutes - startInMinutes
-        } else {
-            (24 * 60 - startInMinutes) + endInMinutes
-        }
-
-        SleepDuration(
-            startStr = formatTime(start),
-            endStr = formatTime(end),
-            durationMinutes = duration
-        )
-    }
 
 
     ModalNavigationDrawer(
@@ -84,7 +53,7 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
             Column(
                 modifier = Modifier
                     .width(280.dp)
-                    .background(color= MaterialTheme.colorScheme.primary)
+                    .background(color = MaterialTheme.colorScheme.primary)
                     .padding(16.dp)
             ) {
                 Text("Sleep Overview", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.Black)
@@ -92,18 +61,23 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                 Text("Last 3 days:", fontWeight = FontWeight.SemiBold, color = Color.Black)
                 Spacer(Modifier.height(8.dp))
 
-                if (sleepDurations.isEmpty()) {
+                val sleepByDay = getSleepHoursByDay(sleepEntries, days = 3)
+
+                if (sleepByDay.isEmpty()) {
                     Text("No sleep data", color = Color.Black)
                 } else {
-                    sleepDurations.forEach {
-                        Text("${it.startStr} - ${it.endStr}: ${formatDuration(it.durationMinutes)}", color = Color.Black)
+                    sleepByDay.forEach { (date, hours) ->
+                        val totalMinutes = (hours * 60).toInt()
+                        Text("$date: ${formatDuration(totalMinutes)}", color = Color.Black)
                     }
-                Spacer(Modifier.height(16.dp))
 
-                Text("Average sleep:", fontWeight = FontWeight.SemiBold, color = Color.Black)
-                    val lastThree = sleepDurations.takeLast(3)
-                    val averageMinutes = lastThree.sumOf { it.durationMinutes } / lastThree.size
-                    Text("Średnia długość snu: ${formatDuration(averageMinutes)}", color = Color.Blue)
+                    Spacer(Modifier.height(16.dp))
+
+                    Text("Average sleep:", fontWeight = FontWeight.SemiBold, color = Color.Black)
+
+                    val avgMinutes = sleepByDay.map { it.second * 60 }.average().toInt()
+
+                    Text("Średnia długość snu: ${formatDuration(avgMinutes)}", color = Color.Blue)
                 }
             }
         },
@@ -141,65 +115,113 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                         .padding(16.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
+
+                    var expandedPlans by remember { mutableStateOf(false) }
+                    var expandedGoals by remember { mutableStateOf(false) }
+                    var expandedTasks by remember { mutableStateOf(false) }
+
                     Text("Dzisiejsze plany", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-                    val plansToShow = if (expanded) sortedPlans else sortedPlans.take(3)
+                    val plansToShow = if (expandedPlans) sortedPlans else sortedPlans.take(3)
 
-                    plansToShow.forEach { plan ->
-                        var checked by remember { mutableStateOf(false) }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(vertical = 4.dp)
-                                .background(accent)
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(plan.name, modifier = Modifier.weight(1f))
-                            Text(" (prio: ${plan.priority})", fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Checkbox(checked = checked, onCheckedChange = { checked = it })
+                    AnimatedVisibility(visible = true) {
+                        Column {
+                            plansToShow.forEach { plan ->
+                                var checkedPlan by remember { mutableStateOf(false) }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .padding(vertical = 4.dp)
+                                        .background(accent)
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    Text(plan.name, modifier = Modifier.weight(1f))
+                                    Text("Importance: ${plan.priority}", fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Checkbox(
+                                        checked = checkedPlan,
+                                        onCheckedChange = { checkedPlan = it })
+                                }
+                            }
                         }
                     }
 
-                    Spacer(Modifier.height(8.dp))
                     Button(
-                        onClick = { expanded = !expanded },
+                        onClick = { expandedPlans = !expandedPlans },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (expanded) "Pokaż mniej" else "Pokaż więcej")
+                        Text(if (expandedPlans) "Pokaż mniej" else "Pokaż więcej")
                     }
 
+
                     Spacer(Modifier.height(16.dp))
-                    Text("Twoje cele", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(top = 16.dp))
-                    goals.forEach { goal ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(vertical = 4.dp)
-                                .background(accent)
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(goal.name, modifier = Modifier.weight(1f))
-                            Checkbox(checked = goal.completed, onCheckedChange = { /* TODO: obsługa */ })
+
+                    Text("Twoje cele", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+                    val goalsToShow = if (expandedGoals) goals else goals.take(3)
+
+                    AnimatedVisibility(visible = true) {
+                        Column {
+                            goalsToShow.forEach { goal ->
+                                var checkedGoal by remember { mutableStateOf(false) }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .padding(vertical = 4.dp)
+                                        .background(accent)
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    Text(goal.name, modifier = Modifier.weight(1f))
+                                    Checkbox(
+                                        checked = checkedGoal,
+                                        onCheckedChange = { checkedGoal = it })
+                                }
+                            }
                         }
                     }
 
+                    Button(
+                        onClick = { expandedGoals = !expandedGoals },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(if (expandedGoals) "Pokaż mniej" else "Pokaż więcej")
+                    }
+
+
                     Spacer(Modifier.height(16.dp))
-                    Text("Dzienne zajęcia", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(top = 16.dp))
-                    dailyTasks.forEach { task ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(vertical = 4.dp)
-                                .background(accent)
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(task.name, modifier = Modifier.weight(1f))
-                            Checkbox(checked = task.completed, onCheckedChange = { /* TODO: obsługa */ })
+
+                    Text("Dzienne zajęcia", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+                    val tasksToShow = if (expandedTasks) dailyTasks else dailyTasks.take(3)
+
+                    AnimatedVisibility(visible = true) {
+                        Column {
+                            tasksToShow.forEach { task ->
+                                var checkedTask by remember { mutableStateOf(false) }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .padding(vertical = 4.dp)
+                                        .background(accent)
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    Text(task.name, modifier = Modifier.weight(1f))
+                                    Checkbox(
+                                        checked = checkedTask,
+                                        onCheckedChange = { checkedTask = it })
+                                }
+                            }
                         }
+                    }
+
+                    Button(
+                        onClick = { expandedTasks = !expandedTasks },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(if (expandedTasks) "Pokaż mniej" else "Pokaż więcej")
                     }
                 }
             }

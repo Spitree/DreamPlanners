@@ -32,10 +32,12 @@ data class Goal(
 
 @Entity
 data class SleepEntry(
-    @PrimaryKey(autoGenerate = true) val uid: Int = 0, // unikalne ID (auto-generowane)
-    val start: Long,
-    val end: Long,
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
+    val startTime: Long,  // np. System.currentTimeMillis()
+    val stopTime: Long,
+    val date: String      // np. "2025-06-16"
 )
+
 
 @Entity
 data class Article(

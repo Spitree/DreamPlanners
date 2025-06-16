@@ -1,6 +1,8 @@
 package com.example.dreamplanner.database
 
 import com.example.dreamplanner.Articles
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 val samplePlans = listOf(
     Plan(
@@ -117,9 +119,32 @@ val sampleArticles = listOf(
         section = "Other Dreams"
     )
 )
-val sampleSleepEntries = listOf(
-    SleepEntry(start = 2200, end = 600),    // 22:00 i 06:00 jako ms od północy
-    SleepEntry(start = 2300, end = 700), // 23:30 i 07:00
-    SleepEntry(start = 15, end = 800) // 00:15 i 08:00
+val sampleSleep = listOf(
+    SleepEntry(
+        startTime = LocalDateTime.of(2025, 6, 11, 22, 45).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 12, 6, 30).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-12"
+    ),
+    SleepEntry(
+        uid = 2,
+        startTime = LocalDateTime.of(2025, 6, 10, 23, 10).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 11, 7, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-11"
+    ),
+    SleepEntry(
+        startTime = LocalDateTime.of(2025, 6, 9, 0, 15).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 9, 6, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-09"
+    ),
+    SleepEntry(
+        startTime = LocalDateTime.of(2025, 6, 8, 22, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 9, 5, 45).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-09"
+    ),
+    SleepEntry(
+        startTime = LocalDateTime.of(2025, 6, 7, 23, 30).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 8, 6, 15).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-08"
+    )
 )
 

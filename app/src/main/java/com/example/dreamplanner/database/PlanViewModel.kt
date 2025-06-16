@@ -35,7 +35,7 @@ class PlanViewModel(application:Application,private val repository: PlanReposito
                 goalDao.insertAll(sampleGoals)
             }
             if (sleepEntryDao.count() == 0) {
-                sleepEntryDao.insertAll(sampleSleepEntries)
+                sleepEntryDao.insertAll(sampleSleep)
             }
             if (articleDao.count() == 0) {
                 articleDao.insertAll(sampleArticles)
@@ -119,6 +119,18 @@ class PlanViewModel(application:Application,private val repository: PlanReposito
 
             // Wstaw nowe plany
             planDao.insertAll(plans)
+        }
+    }
+
+    fun addSleepEntry(sleepEntry: SleepEntry) {
+        viewModelScope.launch {
+            sleepEntryDao.insert(sleepEntry)
+        }
+    }
+
+    fun deleteSleepEntry(sleepEntry: SleepEntry){
+        viewModelScope.launch {
+            sleepEntryDao.delete(sleepEntry)
         }
     }
 

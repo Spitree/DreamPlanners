@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(entities = [Plan::class, DailyTask::class, SleepEntry::class, Goal::class, Article::class],
-    version = 12)
+    version = 13)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun planDao(): PlanDao
@@ -36,7 +36,7 @@ abstract class AppDatabase : RoomDatabase() {
                                 getInstance(context).planDao().insertAll(samplePlans)
                                 getInstance(context).dailyTaskDao().insertAll(sampleDailyTasks)
                                 getInstance(context).goalDao().insertAll(sampleGoals)
-                                getInstance(context).sleepEntryDao().insertAll(sampleSleepEntries)
+                                getInstance(context).sleepEntryDao().insertAll(sampleSleep)
                             }
                         }
                     })
