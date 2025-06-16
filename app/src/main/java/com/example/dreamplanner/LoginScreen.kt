@@ -42,7 +42,7 @@ import com.example.dreamplanner.database.*
 import com.example.dreamplanner.ui.theme.DreamPlannerTheme
 
 @Composable
-fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
+fun LoginScreen(navController: NavController,viewModel: PlanViewModel, onLoginSuccess: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -72,6 +72,7 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
 
         Button(onClick = {
             if (username == "admin" && password == "1234") {
+                viewModel.login()
                 onLoginSuccess()
                 navController.navigate("frontPage") {
                     popUpTo("login") { inclusive = true }

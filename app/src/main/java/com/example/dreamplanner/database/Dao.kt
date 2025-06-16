@@ -72,3 +72,19 @@ interface GoalDao {
     @Delete
     suspend fun delete(goal: Goal)
 }
+
+@Dao
+interface ArticleDao {
+    @Query("SELECT COUNT(*) FROM Article")
+    suspend fun count(): Int
+    @Query("SELECT * FROM Article")
+    fun getAll(): LiveData<List<Article>>
+    @Insert
+    suspend fun insert(articlel: Article)
+    @Insert
+    suspend fun insertAll(article: List<Article>)
+    @Update
+    suspend fun update(article: Article)
+    @Delete
+    suspend fun delete(article: Article)
+}

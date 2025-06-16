@@ -36,3 +36,12 @@ data class SleepEntry(
     val start: Long,
     val end: Long,
 )
+
+@Entity
+data class Article(
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0, // unikalne ID (auto-generowane)
+    val name: String,
+    val section: String,
+    val description: String?, // opcjonalnie
+    val url: String?
+)

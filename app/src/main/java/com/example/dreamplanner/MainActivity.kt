@@ -42,6 +42,9 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.Toast
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -121,12 +124,20 @@ class MainActivity : ComponentActivity() {
 fun Main(viewModel: PlanViewModel) {
     val viewModel: PlanViewModel = viewModel
     val navController = rememberNavController()
-    var isLoggedIn by remember { mutableStateOf(false) }
+    var isLoggedIn by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Dream Planner", fontSize = 22.sp) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Dream Planner", fontSize = 22.sp)
+                        Spacer(Modifier.width(8.dp))
+                        if (viewModel.isLoggedIn) {
+                            Text("Zalogowany", fontSize = 16.sp) // lub np. ikona "zalogowany"
+                        }
+                    }
+                },
                 actions = {
                     IconButton(onClick = { navController.navigate("profile") }) {
                         Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
@@ -149,15 +160,13 @@ fun Main(viewModel: PlanViewModel) {
                     FrontPage(navController = navController, viewModel)
                 }
                 composable("login") {
-                    LoginScreen(navController) {
-                        isLoggedIn = true
-                    }
+                    LoginScreen(navController,viewModel) {isLoggedIn = true}
                 }
                 composable("sleep") {
                     Sleep(navController = navController, viewModel)
                 }
                 composable("articles") {
-                    Articles(navController = navController, viewModel)
+                    Articles(navController = navController, viewModel,isLoggedIn)
                 }
                 composable("plans") {
                     Plans(navController = navController, viewModel)
@@ -224,22 +233,18 @@ fun BottomBar(navController: NavController) {
 
 @Composable
 fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
+    val isLoggedIn = viewModel.isLoggedIn
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // background color
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Profile",
-            fontSize = 28.sp,
-            color = MaterialTheme.colorScheme.primary, // title color
-        )
-
+        Text("Profile", fontSize = 28.sp, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Example user info card
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -247,29 +252,46 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Username: Dreamer",
+                    text = if (isLoggedIn) "Username: Dreamer" else "You are not logged in",
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Email: dreamer@example.com",
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                if (isLoggedIn) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Email: dreamer@example.com",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = { navController.navigate("login") },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            )
-        ) {
-            Text("Login")
+        if (!isLoggedIn) {
+            Button(
+                onClick = { navController.navigate("login") },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
+                Text("Login")
+            }
+        } else {
+            Button(
+                onClick = {
+                    viewModel.logout()
+                    Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
+                Text("Logout")
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -285,3 +307,4 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
         }
     }
 }
+

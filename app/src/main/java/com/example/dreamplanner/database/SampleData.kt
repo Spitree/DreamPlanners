@@ -1,5 +1,7 @@
 package com.example.dreamplanner.database
 
+import com.example.dreamplanner.Articles
+
 val samplePlans = listOf(
     Plan(
         name = "Nauka Kotlin",
@@ -89,6 +91,32 @@ val sampleGoals = listOf(
     Goal(name = "Poranna rutyna", completed = true)
 )
 
+val sampleArticles = listOf(
+    Article(
+        name = "Exploring Lucid Dreams",
+        description = "A beginner's guide to achieving awareness in your dreams.",
+        url = "https://example.com/lucid-dreams-guide",
+        section = "Lucid Dreams"
+    ),
+    Article(
+        name = "The Psychology of Nightmares",
+        description = "Why we have nightmares and how to cope with them.",
+        url = "https://example.com/nightmares-psychology",
+        section = "Nightmares"
+    ),
+    Article(
+        name = "Patterns in Recurring Dreams",
+        description = "What recurring dreams say about your subconscious.",
+        url = "https://example.com/recurring-dreams-patterns",
+        section = "Recurring Dreams"
+    ),
+    Article(
+        name = "Flying in Dreams: What Does It Mean?",
+        description = "Symbolism and interpretation of flying in dreams.",
+        url = "https://example.com/flying-in-dreams",
+        section = "Other Dreams"
+    )
+)
 val sampleSleepEntries = listOf(
     SleepEntry(start = 2200, end = 600),    // 22:00 i 06:00 jako ms od północy
     SleepEntry(start = 2300, end = 700), // 23:30 i 07:00

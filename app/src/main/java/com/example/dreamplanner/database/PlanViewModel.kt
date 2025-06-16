@@ -1,6 +1,9 @@
 package com.example.dreamplanner.database;
 
 import android.app.Application;
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
@@ -11,11 +14,13 @@ class PlanViewModel(application:Application,private val repository: PlanReposito
     private val dailyTaskDao = AppDatabase.getInstance(application).dailyTaskDao()
     private val sleepEntryDao = AppDatabase.getInstance(application).sleepEntryDao()
     private val goalDao = AppDatabase.getInstance(application).goalDao()
+    private val articleDao = AppDatabase.getInstance(application).articleDao()
     //Pobiera singletonową instancję bazy i DAO do obsługi tabeli User.
     val plans: LiveData<List<Plan>> = planDao.getAll()
     val dailyTasks: LiveData<List<DailyTask>> = dailyTaskDao.getAll()
     val sleepEntries: LiveData<List<SleepEntry>> = sleepEntryDao.getAll()
     val goals: LiveData<List<Goal>> = goalDao.getAll()
+    val article: LiveData<List<Article>> = articleDao.getAll()
 
     init {
         viewModelScope.launch {
@@ -32,7 +37,21 @@ class PlanViewModel(application:Application,private val repository: PlanReposito
             if (sleepEntryDao.count() == 0) {
                 sleepEntryDao.insertAll(sampleSleepEntries)
             }
+            if (articleDao.count() == 0) {
+                articleDao.insertAll(sampleArticles)
+            }
         }
+    }
+
+    var isLoggedIn by mutableStateOf(false)
+        private set
+
+    fun login() {
+        isLoggedIn = true
+    }
+
+    fun logout() {
+        isLoggedIn = false
     }
 
     //Udostępnia obserwowalną listę użytkowników z bazy.
@@ -73,7 +92,6 @@ class PlanViewModel(application:Application,private val repository: PlanReposito
         }
     }
 
-    // analogicznie dla Goal
 
     fun toggleGoalCompleted(goal: Goal, completed: Boolean) {
         viewModelScope.launch {
