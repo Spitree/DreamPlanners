@@ -45,39 +45,64 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
         return "${hours}h ${minutes}min"
     }
 
-
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             Column(
                 modifier = Modifier
                     .width(280.dp)
-                    .background(color = MaterialTheme.colorScheme.primary)
+                    .background(color = MaterialTheme.colorScheme.onPrimary)
                     .padding(16.dp)
             ) {
-                Text("Sleep Overview", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.Black)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                    ),) {
+                    Text(
+                        "Sleep Overview",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+                }
+
                 Spacer(Modifier.height(12.dp))
-                Text("Last 3 days:", fontWeight = FontWeight.SemiBold, color = Color.Black)
-                Spacer(Modifier.height(8.dp))
 
-                val sleepByDay = getSleepHoursByDay(sleepEntries, days = 3)
+                Card(
+                    modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                    ),) {
+                    Text("Last 3 days:", fontWeight = FontWeight.SemiBold, color = Color.Black)
+                    Spacer(Modifier.height(8.dp))
 
-                if (sleepByDay.isEmpty()) {
-                    Text("No sleep data", color = Color.Black)
-                } else {
-                    sleepByDay.forEach { (date, hours) ->
-                        val totalMinutes = (hours * 60).toInt()
-                        Text("$date: ${formatDuration(totalMinutes)}", color = Color.Black)
+                    val sleepByDay = getSleepHoursByDay(sleepEntries, days = 3)
+
+                    if (sleepByDay.isEmpty()) {
+                        Text("No sleep data", color = Color.Black)
+                    } else {
+                        sleepByDay.forEach { (date, hours) ->
+                            val totalMinutes = (hours * 60).toInt()
+                            Text("$date: ${formatDuration(totalMinutes)}", color = Color.Black)
+                        }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Text("Average sleep:", fontWeight = FontWeight.SemiBold, color = Color.Black)
+
+                        val avgMinutes = sleepByDay.map { it.second * 60 }.average().toInt()
+
+                        Text(
+                            "${formatDuration(avgMinutes)}",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    Text("Average sleep:", fontWeight = FontWeight.SemiBold, color = Color.Black)
-
-                    val avgMinutes = sleepByDay.map { it.second * 60 }.average().toInt()
-
-                    Text("Średnia długość snu: ${formatDuration(avgMinutes)}", color = Color.Blue)
                 }
             }
         },
@@ -90,7 +115,7 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                 Modifier.fillMaxWidth(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("Overview")
+                                Text("Overview",color = Color.Black)
                             }
                         },
                         navigationIcon = {
@@ -111,6 +136,7 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                         .padding(innerPadding)
                         .padding(16.dp)
                         .verticalScroll(rememberScrollState())
@@ -120,7 +146,7 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                     var expandedGoals by remember { mutableStateOf(false) }
                     var expandedTasks by remember { mutableStateOf(false) }
 
-                    Text("Dzisiejsze plany", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text("Dzisiejsze plany", fontWeight = FontWeight.Bold, fontSize = 18.sp,color = Color.Black)
 
                     val plansToShow = if (expandedPlans) sortedPlans else sortedPlans.take(3)
 
@@ -132,12 +158,12 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
                                         .padding(vertical = 4.dp)
-                                        .background(accent)
+                                        .background(MaterialTheme.colorScheme.onSecondary)
                                         .fillMaxWidth()
                                         .padding(8.dp)
                                 ) {
-                                    Text(plan.name, modifier = Modifier.weight(1f))
-                                    Text("Importance: ${plan.priority}", fontWeight = FontWeight.Bold)
+                                    Text(plan.name, modifier = Modifier.weight(1f),color = Color.Black)
+                                    Text("Importance: ${plan.priority}", fontWeight = FontWeight.Bold,color = Color.Black)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Checkbox(
                                         checked = checkedPlan,
@@ -149,15 +175,20 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
 
                     Button(
                         onClick = { expandedPlans = !expandedPlans },
-                        modifier = Modifier.fillMaxWidth()
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.onPrimary,
+                            MaterialTheme.colorScheme.onPrimary,
+                            MaterialTheme.colorScheme.onPrimary,
+                        )
                     ) {
-                        Text(if (expandedPlans) "Pokaż mniej" else "Pokaż więcej")
+                        Text(if (expandedPlans) "Pokaż mniej" else "Pokaż więcej",color = Color.Black)
                     }
 
 
                     Spacer(Modifier.height(16.dp))
 
-                    Text("Twoje cele", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text("Twoje cele", fontWeight = FontWeight.Bold, fontSize = 18.sp,color = Color.Black)
 
                     val goalsToShow = if (expandedGoals) goals else goals.take(3)
 
@@ -169,11 +200,11 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
                                         .padding(vertical = 4.dp)
-                                        .background(accent)
+                                        .background(MaterialTheme.colorScheme.onSecondary)
                                         .fillMaxWidth()
                                         .padding(8.dp)
                                 ) {
-                                    Text(goal.name, modifier = Modifier.weight(1f))
+                                    Text(goal.name, modifier = Modifier.weight(1f),color = Color.Black)
                                     Checkbox(
                                         checked = checkedGoal,
                                         onCheckedChange = { checkedGoal = it })
@@ -184,15 +215,21 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
 
                     Button(
                         onClick = { expandedGoals = !expandedGoals },
-                        modifier = Modifier.fillMaxWidth()
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.onPrimary,
+                            MaterialTheme.colorScheme.onPrimary,
+                            MaterialTheme.colorScheme.onPrimary,
+                        )
                     ) {
-                        Text(if (expandedGoals) "Pokaż mniej" else "Pokaż więcej")
+                        Text(if (expandedPlans) "Pokaż mniej" else "Pokaż więcej",color = Color.Black)
                     }
+
 
 
                     Spacer(Modifier.height(16.dp))
 
-                    Text("Dzienne zajęcia", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text("Dzienne zajęcia", fontWeight = FontWeight.Bold, fontSize = 18.sp,color = Color.Black)
 
                     val tasksToShow = if (expandedTasks) dailyTasks else dailyTasks.take(3)
 
@@ -204,11 +241,11 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
                                         .padding(vertical = 4.dp)
-                                        .background(accent)
+                                        .background(MaterialTheme.colorScheme.onSecondary)
                                         .fillMaxWidth()
                                         .padding(8.dp)
                                 ) {
-                                    Text(task.name, modifier = Modifier.weight(1f))
+                                    Text(task.name, modifier = Modifier.weight(1f),color = Color.Black)
                                     Checkbox(
                                         checked = checkedTask,
                                         onCheckedChange = { checkedTask = it })
@@ -219,10 +256,16 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
 
                     Button(
                         onClick = { expandedTasks = !expandedTasks },
-                        modifier = Modifier.fillMaxWidth()
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.onPrimary,
+                            MaterialTheme.colorScheme.onPrimary,
+                            MaterialTheme.colorScheme.onPrimary,
+                        )
                     ) {
-                        Text(if (expandedTasks) "Pokaż mniej" else "Pokaż więcej")
+                        Text(if (expandedPlans) "Pokaż mniej" else "Pokaż więcej",color = Color.Black)
                     }
+
                 }
             }
         }

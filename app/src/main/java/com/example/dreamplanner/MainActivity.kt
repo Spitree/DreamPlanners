@@ -42,7 +42,9 @@ import android.content.pm.PackageManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -108,7 +110,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Rozszerzenie klasy MainActivity – masz dostęp do lifecycleScope i this
     private fun MainActivity.syncCalendarPlans() {
         val viewModel = ViewModelProvider(this)[PlanViewModel::class.java]
 
@@ -131,9 +132,12 @@ fun Main(viewModel: PlanViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                ),
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Dream Planner", fontSize = 22.sp)
+                        Text("Dream Planner", fontSize = 22.sp, color = Color.Black)
                         Spacer(Modifier.width(8.dp))
                         if (viewModel.isLoggedIn) {
                             Text("Zalogowany", fontSize = 16.sp) // lub np. ikona "zalogowany"
@@ -190,7 +194,7 @@ fun Main(viewModel: PlanViewModel) {
 fun BottomBar(navController: NavController) {
     Row(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary) // tło całego paska
+            .background(MaterialTheme.colorScheme.secondary) // tło całego paska
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -220,7 +224,9 @@ fun BottomBar(navController: NavController) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.onSecondary)
+                        .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -248,12 +254,13 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Profile", fontSize = 28.sp, color = MaterialTheme.colorScheme.primary)
+        Text("Profile", fontSize = 28.sp, color = Color.Black)
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -283,7 +290,7 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Text("Login")
+                Text("Login", color = Color.Black)
             }
         } else {
             Button(
@@ -296,11 +303,11 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Text("Logout")
+                Text("Logout", color = Color.Black)
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = { navController.popBackStack() },
@@ -309,7 +316,7 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
                 contentColor = MaterialTheme.colorScheme.onSecondary
             )
         ) {
-            Text("Back to Main")
+            Text("Back to Main Menu", color = Color.Black)
         }
     }
 }

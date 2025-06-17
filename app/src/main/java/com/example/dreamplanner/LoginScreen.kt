@@ -26,6 +26,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -49,11 +50,12 @@ fun LoginScreen(navController: NavController,viewModel: PlanViewModel, onLoginSu
 
     Column(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Logowanie", fontSize = 28.sp)
+        Text("Logowanie", fontSize = 28.sp, color = Color.Black)
         Spacer(modifier = Modifier.height(32.dp))
 
         androidx.compose.material3.OutlinedTextField(
@@ -86,7 +88,7 @@ fun LoginScreen(navController: NavController,viewModel: PlanViewModel, onLoginSu
 
             }
         }) {
-            Text("Zaloguj się")
+            Text("Zaloguj się", color = Color.Black)
         }
     }
 }

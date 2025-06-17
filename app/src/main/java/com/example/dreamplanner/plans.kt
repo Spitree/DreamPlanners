@@ -3,12 +3,14 @@ package com.example.dreamplanner
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.CheckboxDefaults.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -16,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,8 +39,11 @@ fun ShareButton(context: Context) {
             putExtra(Intent.EXTRA_TEXT, "Oto mój dzisiejszy plan z aplikacji Dream Planner!")
         }
         context.startActivity(Intent.createChooser(shareIntent, "Udostępnij przez:"))
-    }) {
-        Text("Udostępnij")
+    },colors = ButtonDefaults.buttonColors(
+        contentColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ),) {
+        Text("Udostępnij",color = Color.Black)
     }
 }
 
@@ -47,12 +53,15 @@ fun SmsButton() {
 
     Button(onClick = {
         val smsIntent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("smsto:") // lub wpisz numer np. "smsto:123456789"
+            data = Uri.parse("smsto:")
             putExtra("sms_body", "Oto mój plan dnia z Dream Planner!")
         }
         context.startActivity(smsIntent)
-    }) {
-        Text("Wyślij plan przez SMS")
+    },colors = ButtonDefaults.buttonColors(
+        contentColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surface,
+    )) {
+        Text("Wyślij plan przez SMS",color = Color.Black)
     }
 }
 
@@ -71,9 +80,12 @@ fun Plans(navController: NavController, viewModel: PlanViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
                 title = {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text("Your Planner")
+                        Text("Your Planner",color = Color.Black)
                     }
                 }
             )
@@ -83,9 +95,11 @@ fun Plans(navController: NavController, viewModel: PlanViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.onSecondary)
         ) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
+                modifier = Modifier.background(MaterialTheme.colorScheme.onSecondary)
             ) {
                 tabTitles.forEachIndexed { index, title ->
                     Tab(
@@ -95,14 +109,14 @@ fun Plans(navController: NavController, viewModel: PlanViewModel) {
                                 pagerState.animateScrollToPage(index)
                             }
                         },
-                        text = { Text(title) }
+                        text = { Text(title,color = Color.Black) }
                     )
                 }
             }
 
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             ) { page ->
                 when (page) {
                     0 -> PlansTab(plans,viewModel)
@@ -126,17 +140,20 @@ fun PlansTab(plans: List<Plan>, viewModel: PlanViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                    ),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = plan.name, fontSize = 20.sp)
-                            Text(text = "Priorytet: ${plan.priority}")
-                            Text(text = "Miejsce: ${plan.place}")
-                            Text(text = "Data: ${SimpleDateFormat("yyyy-MM-dd").format(Date(plan.date))}")
+                            Text(text = plan.name, fontSize = 20.sp,color = Color.Black)
+                            Text(text = "Priorytet: ${plan.priority}",color = Color.Black)
+                            Text(text = "Miejsce: ${plan.place}",color = Color.Black)
+                            Text(text = "Data: ${SimpleDateFormat("yyyy-MM-dd").format(Date(plan.date))}",color = Color.Black)
                         }
                         Checkbox(
                             checked = plan.completed,
@@ -145,8 +162,11 @@ fun PlansTab(plans: List<Plan>, viewModel: PlanViewModel) {
                             }
                         )
                         IconButton(onClick = {
-                            viewModel.deletePlan(plan)
-                        }) {
+                            viewModel.deletePlan(plan)},
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = Color.Red
+                            ),
+                        ) {
                             Icon(Icons.Default.Delete, contentDescription = "Usuń plan")
                         }
                     }
@@ -167,9 +187,13 @@ fun PlansTab(plans: List<Plan>, viewModel: PlanViewModel) {
         } else {
             Button(
                 onClick = { showForm = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             ) {
-                Text("Dodaj nowy plan")
+                Text("Dodaj nowy plan",color = Color.Black)
             }
         }
     }
@@ -189,21 +213,28 @@ fun GoalsTab(goals: List<Goal>, viewModel: PlanViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                    ),
+
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = goal.name, fontSize = 18.sp)
+                        Text(text = goal.name, fontSize = 18.sp,color = Color.Black)
                         Spacer(modifier = Modifier.weight(1f))
                         Checkbox(
                             checked = isChecked,
                             onCheckedChange = { checkedStates[goal.uid] = it }
                         )
                         IconButton(onClick = {
-                            viewModel.deleteGoal(goal)
-                        }) {
+                            viewModel.deleteGoal(goal) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = Color.Red
+                            ),)
+                        {
                             Icon(Icons.Default.Delete, contentDescription = "Usuń plan")
                         }
                     }
@@ -224,9 +255,13 @@ fun GoalsTab(goals: List<Goal>, viewModel: PlanViewModel) {
         } else {
             Button(
                 onClick = { showForm = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             ) {
-                Text("Dodaj nowy plan")
+                Text("Dodaj nowy plan",color = Color.Black)
             }
         }
     }
@@ -245,14 +280,17 @@ fun DailyTab(tasks: List<DailyTask>, viewModel: PlanViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                    ),
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = task.name, fontSize = 18.sp)
-                        Text(text = "Priorytet: ${task.priority}")
-                        Text(text = "Opis: ${task.description}")
+                        Text(text = task.name, fontSize = 18.sp,color = Color.Black)
+                        Text(text = "Priorytet: ${task.priority}",color = Color.Black)
+                        Text(text = "Opis: ${task.description}",color = Color.Black)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Wykonane")
+                            Text("Wykonane",color = Color.Black)
                             Spacer(Modifier.width(8.dp))
                             Checkbox(
                                 checked = isChecked,
@@ -260,14 +298,16 @@ fun DailyTab(tasks: List<DailyTask>, viewModel: PlanViewModel) {
                             )
                             IconButton(onClick = {
                                 viewModel.deleteDailyTask(task)
-                            }) {
+                            },colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = Color.Red
+                            ),) {
                                 Icon(Icons.Default.Delete, contentDescription = "Usuń")
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             ShareButton(context)
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             SmsButton()
                         }
                     }
@@ -288,9 +328,13 @@ fun DailyTab(tasks: List<DailyTask>, viewModel: PlanViewModel) {
         } else {
             Button(
                 onClick = { showForm = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             ) {
-                Text("Dodaj nowy")
+                Text("Dodaj nowy plan",color = Color.Black)
             }
         }
     }
@@ -387,14 +431,14 @@ fun AddPlanForm(
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Dodaj")
+                Text("Dodaj",color = Color.Black)
             }
             Spacer(Modifier.width(8.dp))
             Button(
                 onClick = onCancel,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Anuluj")
+                Text("Anuluj",color = Color.Black)
             }
         }
     }
@@ -487,14 +531,14 @@ fun AddDailyTaskForm(
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Dodaj")
+                Text("Dodaj",color = Color.Black)
             }
             Spacer(Modifier.width(8.dp))
             Button(
                 onClick = onCancel,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Anuluj")
+                Text("Anuluj",color = Color.Black)
             }
         }
     }
@@ -525,14 +569,14 @@ fun AddGoalForm(
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Dodaj")
+                Text("Dodaj",color = Color.Black)
             }
             Spacer(Modifier.width(8.dp))
             Button(
                 onClick = onCancel,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Anuluj")
+                Text("Anuluj",color = Color.Black)
             }
         }
     }
