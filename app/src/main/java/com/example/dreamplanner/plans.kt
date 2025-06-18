@@ -3,6 +3,7 @@ package com.example.dreamplanner
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,12 +15,14 @@ import androidx.compose.material.CheckboxDefaults.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -31,37 +34,70 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun ShareButton(context: Context) {
-    Button(onClick = {
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, "Dream Planner")
-            putExtra(Intent.EXTRA_TEXT, "Oto mój dzisiejszy plan z aplikacji Dream Planner!")
+fun ShareButton(context: Context, task: DailyTask) {
+    val shareBody = remember(task) {
+        if (task == null) {
+            "Mój plan dnia jest pusty."
+        } else {
+            buildString {
+                append("Mój plan dnia z Dream Planner:\n")
+                append("${task.name}\n")
+                append("Priorytet: ${task.priority}\n")
+                append("Opis: ${task.description}\n\n")
+            }
         }
-        context.startActivity(Intent.createChooser(shareIntent, "Udostępnij przez:"))
-    },colors = ButtonDefaults.buttonColors(
-        contentColor = MaterialTheme.colorScheme.surface,
-        containerColor = MaterialTheme.colorScheme.surface,
-    ),) {
-        Text("Udostępnij",color = Color.Black)
+    }
+
+    Button(
+        onClick = {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, "Dream Planner")
+                putExtra(Intent.EXTRA_TEXT, shareBody)
+            }
+            context.startActivity(Intent.createChooser(shareIntent, "Udostępnij przez:"))
+        },
+        colors = ButtonDefaults.buttonColors(
+            contentColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
+    ) {
+        Text("Udostępnij", color = Color.Black)
     }
 }
 
 @Composable
-fun SmsButton() {
+fun SmsButton(task: DailyTask) {
     val context = LocalContext.current
 
-    Button(onClick = {
-        val smsIntent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("smsto:")
-            putExtra("sms_body", "Oto mój plan dnia z Dream Planner!")
+    // Tworzymy tekst wiadomości z listy tasków
+    val smsBody = remember(task) {
+        if (task == null) {
+            "Mój plan dnia jest pusty."
+        } else {
+            buildString {
+                append("Mój plan dnia z Dream Planner:\n")
+                append("${task.name}\n")
+                append("Priorytet: ${task.priority}\n")
+                append("Opis: ${task.description}\n\n")
+            }
         }
-        context.startActivity(smsIntent)
-    },colors = ButtonDefaults.buttonColors(
-        contentColor = MaterialTheme.colorScheme.surface,
-        containerColor = MaterialTheme.colorScheme.surface,
-    )) {
-        Text("Wyślij plan przez SMS",color = Color.Black)
+    }
+
+    Button(
+        onClick = {
+            val smsIntent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse("smsto:")
+                putExtra("sms_body", smsBody)
+            }
+            context.startActivity(smsIntent)
+        },
+        colors = ButtonDefaults.buttonColors(
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
+    ) {
+        Text("Wyślij plan przez SMS", color = Color.Black)
     }
 }
 
@@ -81,7 +117,7 @@ fun Plans(navController: NavController, viewModel: PlanViewModel) {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 title = {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -95,33 +131,52 @@ fun Plans(navController: NavController, viewModel: PlanViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.onSecondary)
+                .background(MaterialTheme.colorScheme.primary)
         ) {
+            val selectedTabIndex = pagerState.currentPage
             TabRow(
-                selectedTabIndex = pagerState.currentPage,
-                modifier = Modifier.background(MaterialTheme.colorScheme.onSecondary)
+                selectedTabIndex = selectedTabIndex,
+                modifier = Modifier.background(MaterialTheme.colorScheme.primary),
+                indicator = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 tabTitles.forEachIndexed { index, title ->
+                    val isSelected = selectedTabIndex == index
                     Tab(
-                        selected = pagerState.currentPage == index,
+                        selected = isSelected,
                         onClick = {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(index)
                             }
                         },
-                        text = { Text(title,color = Color.Black) }
+                        text = {
+                            Text(
+                                title,
+                                color = if (isSelected) MaterialTheme.colorScheme.secondary
+                                else MaterialTheme.colorScheme.onPrimary
+                            )
+                        },
+                        selectedContentColor = MaterialTheme.colorScheme.secondary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
             }
 
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
             ) { page ->
                 when (page) {
-                    0 -> PlansTab(plans,viewModel)
-                    1 -> GoalsTab(goals,viewModel)
-                    2 -> DailyTab(dailies,viewModel)
+                    0 -> PlansTab(plans, viewModel)
+                    1 -> GoalsTab(goals, viewModel)
+                    2 -> DailyTab(dailies, viewModel)
                 }
             }
         }
@@ -161,13 +216,17 @@ fun PlansTab(plans: List<Plan>, viewModel: PlanViewModel) {
                                 viewModel.togglePlanCompleted(plan, checked)
                             }
                         )
-                        IconButton(onClick = {
-                            viewModel.deletePlan(plan)},
+                        IconButton(
+                            onClick = { viewModel.deletePlan(plan) },
                             colors = IconButtonDefaults.iconButtonColors(
                                 contentColor = Color.Red
-                            ),
+                            )
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Usuń plan")
+                            Image(
+                                painter = painterResource(id = R.drawable.kosz),
+                                contentDescription = "Usuń plan",
+                                modifier = Modifier.size(48.dp) // Dopasuj rozmiar ikony
+                            )
                         }
                     }
                 }
@@ -226,16 +285,22 @@ fun GoalsTab(goals: List<Goal>, viewModel: PlanViewModel) {
                         Text(text = goal.name, fontSize = 18.sp,color = Color.Black)
                         Spacer(modifier = Modifier.weight(1f))
                         Checkbox(
-                            checked = isChecked,
-                            onCheckedChange = { checkedStates[goal.uid] = it }
+                            checked = goal.completed,
+                            onCheckedChange = { checked ->
+                                viewModel.toggleGoalCompleted(goal, checked)
+                            }
                         )
-                        IconButton(onClick = {
-                            viewModel.deleteGoal(goal) },
+                        IconButton(
+                            onClick = { viewModel.deleteGoal(goal) },
                             colors = IconButtonDefaults.iconButtonColors(
                                 contentColor = Color.Red
-                            ),)
-                        {
-                            Icon(Icons.Default.Delete, contentDescription = "Usuń plan")
+                            )
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.kosz),
+                                contentDescription = "Usuń plan",
+                                modifier = Modifier.size(48.dp) // Dopasuj rozmiar ikony
+                            )
                         }
                     }
                 }
@@ -293,22 +358,29 @@ fun DailyTab(tasks: List<DailyTask>, viewModel: PlanViewModel) {
                             Text("Wykonane",color = Color.Black)
                             Spacer(Modifier.width(8.dp))
                             Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = { checkedStates[task.uid] = it }
+                                checked = task.completed,
+                                onCheckedChange = { checked ->
+                                    viewModel.toggleDailyTaskCompleted(task, checked)
+                                }
                             )
-                            IconButton(onClick = {
-                                viewModel.deleteDailyTask(task)
-                            },colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = Color.Red
-                            ),) {
-                                Icon(Icons.Default.Delete, contentDescription = "Usuń")
+                            IconButton(
+                                onClick = { viewModel.deleteDailyTask(task) },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    contentColor = Color.Red
+                                )
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.kosz),
+                                    contentDescription = "Usuń plan",
+                                    modifier = Modifier.size(48.dp) // Dopasuj rozmiar ikony
+                                )
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Spacer(modifier = Modifier.width(8.dp))
-                            ShareButton(context)
+                            ShareButton(context,task = task)
                             Spacer(modifier = Modifier.width(8.dp))
-                            SmsButton()
+                            SmsButton(task = task)
                         }
                     }
                 }
@@ -360,7 +432,16 @@ fun AddPlanForm(
             value = name,
             onValueChange = { name = it },
             label = { Text("Nazwa") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         Spacer(Modifier.height(8.dp))
 
@@ -369,7 +450,16 @@ fun AddPlanForm(
             onValueChange = { priorityText = it.filter { ch -> ch.isDigit() } },
             label = { Text("Priorytet (liczba)") },
             isError = priorityError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         if (priorityError) {
             Text("Wprowadź poprawny priorytet", color = MaterialTheme.colorScheme.error)
@@ -380,7 +470,16 @@ fun AddPlanForm(
             value = place,
             onValueChange = { place = it },
             label = { Text("Miejsce") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         Spacer(Modifier.height(8.dp))
 
@@ -389,7 +488,16 @@ fun AddPlanForm(
             onValueChange = { dateText = it },
             label = { Text("Data (yyyy-MM-dd)") },
             isError = dateError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         if (dateError) {
             Text("Wprowadź poprawną datę", color = MaterialTheme.colorScheme.error)
@@ -474,7 +582,16 @@ fun AddDailyTaskForm(
             value = name,
             onValueChange = { name = it },
             label = { Text("Nazwa zadania") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
@@ -482,7 +599,16 @@ fun AddDailyTaskForm(
             onValueChange = { priorityText = it.filter { ch -> ch.isDigit() } },
             label = { Text("Priorytet (liczba)") },
             isError = priorityError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         if (priorityError) {
             Text("Wprowadź poprawny priorytet", color = MaterialTheme.colorScheme.error)
@@ -492,7 +618,16 @@ fun AddDailyTaskForm(
             value = description,
             onValueChange = { description = it },
             label = { Text("Opis") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
@@ -500,7 +635,16 @@ fun AddDailyTaskForm(
             onValueChange = { dateText = it },
             label = { Text("Data (yyyy-MM-dd)") },
             isError = dateError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         if (dateError) {
             Text("Wprowadź poprawną datę", color = MaterialTheme.colorScheme.error)
@@ -556,7 +700,16 @@ fun AddGoalForm(
             value = name,
             onValueChange = { name = it },
             label = { Text("Nazwa celu") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         Spacer(Modifier.height(8.dp))
         Row {

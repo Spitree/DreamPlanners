@@ -1,6 +1,7 @@
 package com.example.dreamplanner
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import kotlinx.coroutines.launch
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.res.painterResource
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +54,7 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                 modifier = Modifier
                     .width(280.dp)
                     .background(color = MaterialTheme.colorScheme.onPrimary)
-                    .padding(16.dp)
+                    .padding(4.dp)
             ) {
                 Card(
                     modifier = Modifier
@@ -124,11 +126,15 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                     if (drawerState.isClosed) drawerState.open() else drawerState.close()
                                 }
                             }) {
-                                Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                                Image(
+                                    painter = painterResource(id = R.drawable.menu),
+                                    contentDescription = "Usuń plan",
+                                    modifier = Modifier.size(24.dp) // Dopasuj rozmiar ikony
+                                )
                             }
                         },
                         colors = TopAppBarDefaults.mediumTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primary
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                 }
@@ -166,8 +172,11 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                     Text("Importance: ${plan.priority}", fontWeight = FontWeight.Bold,color = Color.Black)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Checkbox(
-                                        checked = checkedPlan,
-                                        onCheckedChange = { checkedPlan = it })
+                                        checked = plan.completed,
+                                        onCheckedChange = { checked ->
+                                            viewModel.togglePlanCompleted(plan, checked)
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -206,8 +215,11 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                 ) {
                                     Text(goal.name, modifier = Modifier.weight(1f),color = Color.Black)
                                     Checkbox(
-                                        checked = checkedGoal,
-                                        onCheckedChange = { checkedGoal = it })
+                                        checked = goal.completed,
+                                        onCheckedChange = { checked ->
+                                            viewModel.toggleGoalCompleted(goal, checked)
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -247,8 +259,11 @@ fun FrontPage(navController: NavController, viewModel: PlanViewModel) {
                                 ) {
                                     Text(task.name, modifier = Modifier.weight(1f),color = Color.Black)
                                     Checkbox(
-                                        checked = checkedTask,
-                                        onCheckedChange = { checkedTask = it })
+                                        checked = task.completed,
+                                        onCheckedChange = { checked ->
+                                            viewModel.toggleDailyTaskCompleted(task, checked)
+                                        }
+                                    )
                                 }
                             }
                         }

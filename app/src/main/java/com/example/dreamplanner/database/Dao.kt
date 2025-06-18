@@ -88,3 +88,11 @@ interface ArticleDao {
     @Delete
     suspend fun delete(article: Article)
 }
+
+@Dao
+interface UserDao {
+    @Query("SELECT * FROM users WHERE username = :username")
+    suspend fun getUserByUsername(username: String): User?
+    @Insert
+    suspend fun insertUser(user: User)
+}

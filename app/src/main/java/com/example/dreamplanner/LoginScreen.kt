@@ -20,8 +20,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +44,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.dreamplanner.database.*
 import com.example.dreamplanner.ui.theme.DreamPlannerTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavController,viewModel: PlanViewModel, onLoginSuccess: () -> Unit) {
@@ -61,34 +65,142 @@ fun LoginScreen(navController: NavController,viewModel: PlanViewModel, onLoginSu
         androidx.compose.material3.OutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Login") }
+            label = { Text("Login") },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         Spacer(modifier = Modifier.height(16.dp))
         androidx.compose.material3.OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Hasło") },
-            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
         )
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(onClick = {
-            if (username == "admin" && password == "1234") {
-                viewModel.login()
-                onLoginSuccess()
-                navController.navigate("frontPage") {
-                    popUpTo("login") { inclusive = true }
-                }
-            } else{
-                if (username != "admin"){
-                    Toast.makeText(context, "Incorrect Username",Toast.LENGTH_SHORT).show();
-                } else{
-                    Toast.makeText(context, "Incorrect Password",Toast.LENGTH_SHORT).show();
-                }
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
 
+        Button(onClick = {
+            scope.launch {
+                val isAuthenticated = viewModel.authenticateUser(username, password)
+                if (isAuthenticated) {
+                    viewModel.loginUser(username)  // ustawiamy username
+                    onLoginSuccess()
+                    navController.navigate("frontPage") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                } else {
+                    val userExists = viewModel.userExists(username)
+                    if (!userExists) {
+                        Toast.makeText(context, "Niepoprawna nazwa użytkownika", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Niepoprawne hasło", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }) {
             Text("Zaloguj się", color = Color.Black)
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { navController.popBackStack() },
+        ) {
+            Text("Back to Main Menu", color = Color.Black)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Nie masz konta? Zarejestruj się",
+            color = Color.Black,
+            modifier = Modifier.clickable {
+                navController.navigate("register")
+            }
+        )
     }
 }
+
+@Composable
+fun RegisterScreen(navController: NavController, viewModel: PlanViewModel) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope() // <- PRZENIESIONE TUTAJ
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Rejestracja", fontSize = 28.sp)
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedTextField(value = username, onValueChange = { username = it },            colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.DarkGray,
+            focusedLabelColor = Color.Gray,
+            unfocusedLabelColor = Color.Gray,
+            cursorColor = Color.Gray,
+            focusedTextColor = Color.Gray,
+            unfocusedTextColor = Color.Gray
+        ), label = { Text("Login") })
+        Spacer(Modifier.height(16.dp))
+        OutlinedTextField(value = password, onValueChange = { password = it },
+                colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.DarkGray,
+            focusedLabelColor = Color.Gray,
+            unfocusedLabelColor = Color.Gray,
+            cursorColor = Color.Gray,
+            focusedTextColor = Color.Gray,
+            unfocusedTextColor = Color.Gray
+        )
+            , label = { Text("Hasło") })
+
+        Spacer(Modifier.height(24.dp))
+
+        Button(onClick = {
+            scope.launch {
+                val success = viewModel.registerUser(username, password)
+                if (success) {
+                    Toast.makeText(context, "Zarejestrowano pomyślnie!", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                } else {
+                    Toast.makeText(context, "Nazwa użytkownika jest już zajęta", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }) {
+            Text("Zarejestruj się",color = Color.Black)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { navController.popBackStack() },
+        ) {
+            Text("Back to Main Menu", color = Color.Black)
+        }
+
+    }
+}
+
+

@@ -42,6 +42,7 @@ import android.content.pm.PackageManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
@@ -133,20 +134,24 @@ fun Main(viewModel: PlanViewModel) {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
+                    containerColor = MaterialTheme.colorScheme.onBackground
                 ),
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Dream Planner", fontSize = 22.sp, color = Color.Black)
                         Spacer(Modifier.width(8.dp))
                         if (viewModel.isLoggedIn) {
-                            Text("Zalogowany", fontSize = 16.sp) // lub np. ikona "zalogowany"
+                            Text("Witaj ${viewModel.loggedInUsername}", fontSize = 16.sp, color = Color.Black) // lub np. ikona "zalogowany"
                         }
                     }
                 },
                 actions = {
                     IconButton(onClick = { navController.navigate("profile") }) {
-                        Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
+                        Image(
+                            painter = painterResource(id = R.drawable.profile),
+                            contentDescription = "Usuń plan",
+                            modifier = Modifier.size(24.dp) // Dopasuj rozmiar ikony
+                        )
                     }
                 }
             )
@@ -182,6 +187,9 @@ fun Main(viewModel: PlanViewModel) {
                 }
                 composable("profile") {
                     ProfileScreen(navController = navController, viewModel)
+                }
+                composable("register") {
+                    RegisterScreen(navController, viewModel)
                 }
             }
         }
@@ -265,14 +273,17 @@ fun ProfileScreen(navController: NavController, viewModel: PlanViewModel) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = if (isLoggedIn) "Username: Dreamer" else "You are not logged in",
+                    text = if (viewModel.isLoggedIn && viewModel.loggedInUsername != null)
+                        "Username: ${viewModel.loggedInUsername}"
+                    else
+                        "You are not logged in",
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                if (isLoggedIn) {
+                if (viewModel.isLoggedIn && viewModel.loggedInUsername != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Email: dreamer@example.com",
+                        text = "Email: ${viewModel.loggedInUsername}@example.com",
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )

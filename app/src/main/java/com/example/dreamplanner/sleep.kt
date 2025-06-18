@@ -38,6 +38,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.ui.platform.LocalContext
 import java.time.LocalDate
 import java.time.LocalTime
@@ -56,7 +57,7 @@ fun Sleep(navController: NavController, viewModel: PlanViewModel) {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 title = {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
@@ -161,14 +162,14 @@ fun Sleep(navController: NavController, viewModel: PlanViewModel) {
                     modifier = Modifier
                         .clickable { showAll = !showAll }
                         .align(Alignment.End),
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Sleep Chart", fontSize = 20.sp,color = Color.Black)
+            Text("Sleep Chart", fontSize = 20.sp,color = Color.Black, fontWeight = FontWeight.Bold)
             val sleepByDay = getSleepHoursByDay(sleeps, 7)
 
             Text("Sleep Hours Last 7 Days", fontSize = 20.sp, modifier = Modifier.padding(vertical = 8.dp),color = Color.Black)
@@ -208,7 +209,7 @@ fun Sleep(navController: NavController, viewModel: PlanViewModel) {
                         modifier = Modifier
                             .fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
+                            containerColor = MaterialTheme.colorScheme.secondary,
                         ),
 
                         elevation = cardElevation(defaultElevation = 4.dp),
@@ -219,7 +220,7 @@ fun Sleep(navController: NavController, viewModel: PlanViewModel) {
                         ) {
                             Text(label, fontWeight = FontWeight.Bold,color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("$percent%", fontSize = 24.sp,fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+                            Text("$percent%", fontSize = 24.sp,fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
@@ -284,11 +285,11 @@ fun SleepBarChart(data: List<Pair<String, Float>>, modifier: Modifier = Modifier
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.secondary
         ),
     ) {
         Row(
-            modifier = modifier.background(MaterialTheme.colorScheme.primary),
+            modifier = modifier.background(MaterialTheme.colorScheme.secondary),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
 
@@ -346,7 +347,16 @@ fun AddSleepEntryForm(
                 singleLine = true,
                 isError = errorMsg != null ,
                 modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Gray,
+                    unfocusedBorderColor = Color.DarkGray,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Gray,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray
+            )
             )
             OutlinedTextField(
                 value = stopText,

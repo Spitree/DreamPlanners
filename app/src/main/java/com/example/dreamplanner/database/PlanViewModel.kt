@@ -46,12 +46,17 @@ class PlanViewModel(application:Application,private val repository: PlanReposito
     var isLoggedIn by mutableStateOf(false)
         private set
 
-    fun login() {
+    var loggedInUsername by mutableStateOf<String?>(null)
+        private set
+
+    fun loginUser(username: String) {
         isLoggedIn = true
+        loggedInUsername = username
     }
 
     fun logout() {
         isLoggedIn = false
+        loggedInUsername = null
     }
 
     //Udostępnia obserwowalną listę użytkowników z bazy.
@@ -141,4 +146,21 @@ class PlanViewModel(application:Application,private val repository: PlanReposito
     suspend fun insertAll(plans: List<Plan>) {
         planDao.insertAll(plans)
     }
+
+    private val userDao = AppDatabase.getInstance(application).userDao()
+
+    suspend fun registerUser(username: String, password: String): Boolean {
+        val existingUser = userDao.getUserByUsername(username)  // teraz zwraca User? bez LiveData
+        if (existingUser != null) return false
+        userDao.insertUser(User(username = username, password = password))
+        return true
+    }
+    suspend fun authenticateUser(username: String, password: String): Boolean {
+        val user = userDao.getUserByUsername(username)
+        return user?.password == password
+    }
+    suspend fun userExists(username: String): Boolean {
+        return userDao.getUserByUsername(username) != null
+    }
 }
+

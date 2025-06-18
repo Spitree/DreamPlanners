@@ -145,6 +145,33 @@ val sampleSleep = listOf(
         startTime = LocalDateTime.of(2025, 6, 7, 23, 30).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
         stopTime = LocalDateTime.of(2025, 6, 8, 6, 15).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
         date = "2025-06-08"
-    )
+    ),
+    SleepEntry(
+            startTime = LocalDateTime.of(2025, 6, 14, 22, 15).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            stopTime = LocalDateTime.of(2025, 6, 15, 6, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            date = "2025-06-15"
+    ),
+    SleepEntry(
+        startTime = LocalDateTime.of(2025, 6, 15, 23, 0)
+        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 16, 7, 30)
+        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-16"
+    ),
+    SleepEntry(
+        startTime = LocalDateTime.of(2025, 6, 16, 22, 45)
+        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 17, 6, 15)
+        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-17"
+    ),
+
+    SleepEntry(
+        startTime = LocalDateTime.of(2025, 6, 13, 23, 50)
+        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        stopTime = LocalDateTime.of(2025, 6, 14, 6, 20)
+        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        date = "2025-06-14"
+    ),
 )
 

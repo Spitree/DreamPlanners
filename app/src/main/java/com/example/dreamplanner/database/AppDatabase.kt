@@ -9,8 +9,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [Plan::class, DailyTask::class, SleepEntry::class, Goal::class, Article::class],
-    version = 13)
+@Database(entities = [Plan::class, DailyTask::class, SleepEntry::class,
+    Goal::class, Article::class, User::class],
+    version = 17)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun planDao(): PlanDao
@@ -18,6 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun sleepEntryDao(): SleepEntryDao
     abstract fun goalDao(): GoalDao
     abstract fun articleDao(): ArticleDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

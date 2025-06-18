@@ -9,18 +9,19 @@ import androidx.compose.ui.graphics.Color
 val accent = Color(0x660FA7E7)
 // Define your custom colors
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFFC9C758),
-    onPrimary = Color(0xFFC0AC4A),
+    primary = Color(0xFFD8B75C),      // ciepły żółty, ale nie jaskrawy
+    onPrimary = Color(0xFFB78E2F),    // ciemniejszy, złocisty
 
-    secondary = Color(0xFFE6C44A),
-    onSecondary = Color(0xFFCBA228),
+    secondary = Color(0xFFC69B3D),    // pomarańczowo-żółty, lekko złoty
+    onSecondary = Color(0xFFB4841F),  // ciemniejszy pomarańcz
 
-    background = Color(0xFFE5AD3E),
-    onBackground = Color(0xFFAB7729),
+    background = Color(0xFFF0C75E),   // delikatny, kremowo-żółty
+    onBackground = Color(0xFFAA7E2B), // ciemny, złoty odcień
 
-    surface = Color(0xFFF6BD64),
-    onSurface = Color(0xFFA97B20),
+    surface = Color(0xFFE6A951),      // ciepły, stonowany pomarańcz
+    onSurface = Color(0xFFBC8742)     // trochę ciemniejszy pomarańcz
 )
+
 
 
 
